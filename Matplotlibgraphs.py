@@ -92,7 +92,6 @@ for sublist in splitlist:
                         max_position = max(max_position, start + width)
 
     # Create output folder named by concatenated barcodes
-    foldername = "".join([item[:9] for item in sublist])
     outfolder = f"mergedbarplots/{foldername}"
     os.makedirs(outfolder, exist_ok=True)
 

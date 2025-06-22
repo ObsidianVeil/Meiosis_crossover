@@ -19,7 +19,7 @@ conda activate meiosis
 
 cd /share/BioinfMSc/ml_projects/FH_files #set to wherever you want all your files
 
-mkdir -p barcodes train_files maf_files dotplots sam_files bam_files bamfiles_sorted coverageplots bigwigs brokenbarplots mergedbarplots
+mkdir -p barcodes train_files maf_files dotplots sam_files bam_files bamfiles_sorted coverageplots bigwigs mergedbarplots
 
 scp /share/BioinfMSc/ml_projects/Yeasts/SGray/*.pass.fastq.gz ./barcodes #amend source directory to wherever you saved your fastq files
 
@@ -54,8 +54,7 @@ for barcode in barcodes/*.pass.fastq.gz; do
 done
 
 for barcode in bamfiles_sorted/*.bam; do
-	[[ "$barcode" == *.bam.bai ]] && continue #skips the .bam.bai files
-	filename=$(basename "barcode" | cut -c1-9) #creates filename with just barcodeXX
+	filename=$(basename "$barcode" | cut -c1-9) #creates filename with just barcodeXX
 	echo "Generating bigwig file for $barcode"
 	bamCoverage -b "$barcode" -o bigwigs/"$filename"_coverage.bw -of bigwig
 	
