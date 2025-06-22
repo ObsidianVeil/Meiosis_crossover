@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=300g
-#SBATCH --time=72:00:00
+#SBATCH --time=48:00:00
 #SBATCH --job-name=Allfiles_all_analysis
 #SBATCH --output=/share/BioinfMSc/ml_projects/FH_files/logs/%x-%j.out
 #SBATCH --error=/share/BioinfMSc/ml_projects/FH_files/logs/%x-%j.err
@@ -14,19 +14,14 @@
 
 source $HOME/.bash_profile
 
-#to do:
-#make one conda env with bigwig, LAST and python in
-#Python script needs a for loop to process each chromosome #should be done now? 18/06/25
 
+conda activate meiosis
 
+cd /share/BioinfMSc/ml_projects/FH_files #set to wherever you want all your files
 
-conda activate LASTaligner
+mkdir -p barcodes train_files maf_files dotplots sam_files bam_files bamfiles_sorted coverageplots bigwigs brokenbarplots mergedbarplots
 
-cd /share/BioinfMSc/ml_projects/FH_files
-
-mkdir -p barcodes train_files maf_files dotplots sam_files bam_files bamfiles_sorted coverageplots bigwigs brokenbarplots
-
-scp /share/BioinfMSc/ml_projects/Yeasts/SGray/*.pass.fastq.gz ./barcodes
+scp /share/BioinfMSc/ml_projects/Yeasts/SGray/*.pass.fastq.gz ./barcodes #amend source directory to wherever you saved your fastq files
 
 samtools faidx edited_chr_refs.fasta
 
@@ -34,7 +29,7 @@ samtools faidx edited_chr_refs.fasta
 for barcode in barcodes/*.pass.fastq.gz; do
 	filename=$(basename "$barcode" | cut -c1-9)
 	echo "Starting lastdb on $barcode"
-	lastdb -P32 refdb edited_chr_refs.fasta
+	lastdb -P32 refdb edited_chr_refs.fasta #insert reference genome here
 	
 	echo "Starting last-train on $barcode"
 	last-train -P32 -Q0 refdb $barcode > train_files/"$filename".train
@@ -58,10 +53,6 @@ for barcode in barcodes/*.pass.fastq.gz; do
 	samtools index bamfiles_sorted/"$filename"_sorted.bam
 done
 
-conda deactivate
-
-conda activate bigwig
-
 for barcode in bamfiles_sorted/*.bam; do
 	[[ "$barcode" == *.bam.bai ]] && continue #skips the .bam.bai files
 	filename=$(basename "barcode" | cut -c1-9) #creates filename with just barcodeXX
@@ -69,23 +60,10 @@ for barcode in bamfiles_sorted/*.bam; do
 	bamCoverage -b "$barcode" -o bigwigs/"$filename"_coverage.bw -of bigwig
 	
 	echo "Calculating coverage for $barcode"
-	plotCoverage -b "$barcode" -o coverageplots/"$filename"_coverage.png --numberOfProcessors max --verbose
+	plotCoverage -b "$barcode" -o coverageplots/"$filename"_coverage.png --numberOfProcessors max
 done
 
-conda deactivate
-
-conda activate lectures
-for file in bigwigs/*.bw; do
-	filename=$(basename "$file")
-	fullpath="$file"
-	barcode="${filename%%_coverage.bw}"
-	echo "$fullpath"
-	export barcode
-	export fullpath
-	mkdir -p brokenbarplots/"$barcode"
-	python ./placeholderpath
-	
-done
+python Matplotlibgraphs.py
 
 conda deactivate
 exit
