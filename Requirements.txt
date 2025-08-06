@@ -1,1 +1,1 @@
-conda create --name meiosis samtools last deeptools python=3.12.7 numpy seaborn pandas matplotlib pyBigWig
+conda create --name meiosis samtools last deeptools python=3.12.7 matplotlib pyBigWig bioconda::seqkit bioconda::pysam samtools bioconda::minimap2
