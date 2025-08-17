@@ -30,11 +30,9 @@ mkdir -p "$output"
 
 cross_chrom_python="Cross_chrom_mapping_correct.py"
 
-Crossover_csv_script="Crossover_points.py"
+#Crossover_csv_script="Crossover_points.py"
 
-matplotlib_script="Matplotlibgraphs.py"
-
-retag_script="Retag_supplements.py"
+matplotlib_script="matplotlibgraphs_with_transition_csv.py"
 
 ################################################################################################################################################
 
@@ -233,7 +231,17 @@ fi
 #silence for debugging
 echo "Cleaning up"
 echo "Removing $removedirs"
-rm -r "$removedirs"
+if [[ ${#removedirs[@]} -gt 0 ]]; then
+    echo "Removing directories:"
+    for item in "${removedirs[@]}"; do
+        if [[ -n "$item" && -e "$item" ]]; then
+            echo "Deleting $item"
+            rm -r -- "$item"   # '--' prevents weird behavior with filenames starting with '-'
+        else
+            echo "Skipping $item (does not exist)"
+        fi
+    done
+fi
 
 echo "Finished. Deactivating Conda and ending run"
 
